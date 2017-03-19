@@ -9,11 +9,9 @@ layout: default
         <span class="meta padded">
             {{ page.date | date: "%B %-d, %Y" }} &middot;
             {% include reading_time.html %} read &middot;
-            <a href="{{ site.url }}{{ page.url }}#disqus_thread" itemprop="discussionUrl">0 Comments</a>
+            <a href="{{ page.url | absolute_url }}#disqus_thread" itemprop="discussionUrl">0 Comments</a>
         </span>
-
         <main>{{ content }}</main>
-
         <div class="share-page padded">
             Share this on &rarr;
             <a href="https://twitter.com/intent/tweet?text={{ page.title }}&url={{ site.url }}{{ page.url }}&via={{ site.twitter_username }}&related={{ site.twitter_username }}" rel="nofollow" target="_blank" title="Share on Twitter">Twitter</a>
