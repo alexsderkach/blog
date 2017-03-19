@@ -1,0 +1,40 @@
+---
+layout: default
+---
+
+<div class="body container">
+    <div class="archive">
+
+{% for post in site.posts %}
+{% assign currentdate = post.date | date: "%y" %}
+{% if currentdate != date %}
+        <h2 class="year">'{{ currentdate }}</h2>
+{% assign date = currentdate %}
+{% endif %}
+        <div class="item">
+            <span class="meta">
+                <div>{{ post.date | date: "%B %-d, %Y" }}</div>
+
+                {% if post.tags.size > 0 %}
+                <div class="tags">
+                    [
+                {% assign tags = '' | split:',' %}
+                {% for tag in post.tags %}
+                    {% assign tagLink = '<a href="#">' | append: tag | append: '</a>' %}
+                    {% assign tags = tags | push: tagLink %}
+                {% endfor %}
+
+                {{ tags | join: ', ' }}
+                    ]
+                </div>
+                {% endif %}
+
+            </span>
+            <a href="{{ post.url | absolute_url }}" class="title">
+                {{ post.title }}
+            </a>
+        </div>
+{% endfor %}
+
+    </div>
+</div>

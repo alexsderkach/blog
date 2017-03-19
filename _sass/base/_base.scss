@@ -1,0 +1,85 @@
+.body a, footer a {
+  border-bottom: 1px solid #ddd;
+  &:hover {
+    border-bottom-color: #000;
+  }
+}
+.container, .padded {
+  max-width: 35rem;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+header {
+  margin-bottom: 0;
+  font-size: 1rem;
+  color: #777;
+}
+header:after, article:not(:last-child):after, footer:before {
+  display: block;
+  content: "";
+  width: 100px;
+  height: 1px;
+  margin: 2rem auto;
+  background-color: #eee;
+}
+footer {
+  text-align: center;
+  font-size: 0.8rem;
+  p {
+    margin: 0.5rem;
+  }
+  a.github {
+    display: inline-block;
+    margin: 0.5rem;
+    border: 0;
+    svg {
+      fill: #c6cbd1;
+    }
+    &:hover {
+      svg {
+        fill: #46494d;
+      }
+    }
+  }
+}
+.nav {
+  padding-left: 0;
+  margin-bottom: 0;
+  list-style: none;
+  li {
+    display: inline-block;
+    & + li {
+      margin-left: .5rem;
+    }
+  }
+}
+
+@media (min-width: 34em) {
+  header {
+    padding-top: 1rem!important;
+    text-align: right;
+    .title {
+      float: left;
+    }
+  }
+}
+
+.qna,
+.related,
+.footer {
+  text-align: center;
+  ul {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 0;
+  }
+}
+.share-page {
+  text-align: center;
+  padding: 8px 15px;
+  border-radius: 5px;
+  a {
+    font-weight: 700;
+    margin-left: 10px;
+  }
+}
