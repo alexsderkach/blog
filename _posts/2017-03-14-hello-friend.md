@@ -2,8 +2,7 @@
 layout: post
 title:  "Hello, friend?"
 comments: true
-tags: intro
-keywords: intro
+keywords: intro hello
 ---
 {% include image.html name="hello.jpg" caption="Hello" %}
 I was pessimistic about blogging at first. I thought it was a waste of time. Time I could spend on writing code, reading a book, play a video-game, etc. Then something changed my mind.

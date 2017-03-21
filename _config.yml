@@ -36,7 +36,6 @@ exclude:
 sass:
   style: compressed
 
-url: "http://alexsderkach.io"
 google_analytics: UA-94002520-1
 disqus:
   shortname: alexsderkach

@@ -68,6 +68,9 @@ article {
   > h2, > span, p, ul, h3 {
     @extend .padded;
   }
+  ul {
+    padding-left: 4rem;
+  }
   .image {
     @extend .padded;
     padding: 0;
