@@ -39,3 +39,5 @@ sass:
 google_analytics: UA-94002520-1
 disqus:
   shortname: alexsderkach
+
+include: [CNAME]
