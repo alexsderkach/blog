@@ -20,6 +20,7 @@ author:
 logo: /assets/me.png
 
 permalink: /:title/
+url: http://alexsderkach.io
 
 markdown: kramdown
 theme: minima

@@ -9,8 +9,7 @@
         {{ page.title }} &middot; {{ site.title }}
         {% endif %}
     </title>
-    {% if page.excerpt %}<meta name="description" content="{{ page.excerpt | strip_html }}">{% endif %}
-    {% if page.tags %}<meta name="keywords" content="{{ page.tags | join: ', ' }}">{% endif %}
+    {% if page.tags %}<meta name="keywords" content="{{ page.keywords | join: ', ' }}">{% endif %}
 
     <!-- CSS -->
     <link rel="stylesheet" href="{{ '/assets/main.css' | absolute_url }}">

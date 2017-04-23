@@ -2,5 +2,5 @@
 <figure class="image">
     {% assign assets_path = '/assets/posts/' %}
     {% assign imageUrl = assets_path | append: imagePath %}
-    <img src="{{ imageUrl | absolute_url }}" {% if include.caption %} alt="{{ include.caption }}" {% endif %}/>
+    <img async src="{{ imageUrl | absolute_url }}" {% if include.caption %} alt="{{ include.caption }}" {% endif %}/>
 </figure>

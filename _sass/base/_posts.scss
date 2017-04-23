@@ -65,10 +65,10 @@ article {
   pre {
     @extend .container;
   }
-  > h2, > span, p, ul, h3 {
+  > h2, > span, p, ul, ol, h1, h2, h3 {
     @extend .padded;
   }
-  ul {
+  ul, ol {
     padding-left: 4rem;
   }
   .image {
