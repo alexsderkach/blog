@@ -33,7 +33,7 @@ Ready, steady, go!
 ---
 
 ## Composable
-All of these classes are composable and allow as to think functionally. That's why we love them.
+All of these classes are composable and allow us to think functionally. That's why we love them.
 
 __CompletableFuture__ - a lot of `.then*()` methods which allow to build a pipeline, that can pass nothing or single value + throwable from stage to stage.
 
