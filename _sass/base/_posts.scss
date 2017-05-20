@@ -48,6 +48,10 @@
 }
 
 article {
+  p + h1, p + h2, p + h3, p + h4, p + h5,
+  h2:first-child, h2 + h3 {
+    padding-top: 1rem;
+  }
   position: relative;
   margin-bottom: 2rem;
   .meta {
