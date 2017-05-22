@@ -101,6 +101,7 @@ public class Converter<K, V> {
 {% endhighlight %}
 
 Then, lets define the template of repository.
+Couchbase provides its API via AsyncBucket, which is based on RxJava 1.
 
 {% highlight java linenos %}
 public class CouchbaseRepository<K, V> {
@@ -113,7 +114,7 @@ public class CouchbaseRepository<K, V> {
     public Observable<V> get(K key) { ... }
     public Observable<V> insert(K key, V value) { ... }
     public Completable remove(K key) { ... }
-    public Observable<V> update(K key, Function<Optional<V>, V> updateFunction) { ... }
+    public Observable<V> update(K key, Function<V, V> updateFunction) { ... }
     public Observable<V> cas(K key, Function<Optional<V>, V> updateFunction) { .. }
 
 }
@@ -187,7 +188,7 @@ public Completable remove(K key) {
 }
 {% endhighlight %}
 
-### 4. update(K key, Function<Optional\<V>, V> update)
+### 4. update(K key, Function<V, V> update)
 Flow:
 1. fetch document
 2. convert document to value
@@ -195,12 +196,14 @@ Flow:
 4. save new value
 5. repeat from 1 if CAS mismatches
 
+In order to retry something, we need a function, which will produce new value.
+This function would be called after every fail, to produce new value, based on existing value.
+
 {% highlight java linenos %}
-public Observable<V> update(K key, Function<Optional<V>, V> updateFunction) {
+public Observable<V> update(K key, Function<V, V> updateFunction) {
     return just(converter.document(key))
             .flatMap(bucket::get)
             .flatMap(doc -> just(converter.from(doc))
-                .map(Optional::ofNullable)
                 .map(updateFunction::apply)
                 .map(value -> converter.document(key, value, doc.cas()))
                 .flatMap(bucket::replace)
@@ -231,9 +234,15 @@ Flow:
 2. if document not found, use **insert flow**
 3. repeat from 1 if CAS mismatches, or Document was inserted during update by someone else, or Document was removed during insert by someone else
 
+This method will use the same update function.
+But now, input to the function would be **Optional**.
+In this way, the caller would now:
+- if value is present, update is performed.
+- if value is absent, insert is performed. 
+
 {% highlight java linenos %}
 public Observable<V> cas(K key, Function<Optional<V>, V> updateFunction) {
-    return update(key, updateFunction)
+    return update(key, v -> updateFunction.apply(Optional.of(v)))
         .switchIfEmpty(insert(key, updateFunction.apply(Optional.empty())))
         .retryWhen(casRetryFunction());           // retry in case of failure
 }
