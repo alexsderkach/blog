@@ -138,6 +138,7 @@ public Observable<V> get(K key) {
 {% endhighlight %}
 
 Common post processing code for observable with response looks like this:
+
 {% highlight java linenos %}
 private Observable.Transformer<RawJsonDocument, V> common(RetryWhenFunction retryWhenFunction) {
     return observable -> observable
