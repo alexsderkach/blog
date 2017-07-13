@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <title>
+        
+        Alex's Derkach Blog
+        
+    </title>
+    
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="http://alexsderkach.io/assets/main.css">
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=PT+Serif:400,400italic,700">
+    <!-- Icons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="http://alexsderkach.io/assets/favicons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" href="http://alexsderkach.io/assets/favicons/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="http://alexsderkach.io/assets/favicons/favicon-16x16.png" sizes="16x16">
+    <link rel="manifest" href="http://alexsderkach.io/assets/favicons/manifest.json">
+    <link rel="mask-icon" href="http://alexsderkach.io/assets/favicons/safari-pinned-tab.svg" color="#000000">
+    <meta name="theme-color" content="#ffffff">
+
+    <!-- RSS -->
+    <link rel="alternate" type="application/rss+xml" title="Alex&#39;s Derkach Blog" href="http://alexsderkach.io/feed.xml">
+
+    <!-- Begin Jekyll SEO tag v2.2.3 -->
+<meta property="og:title" content="Alex’s Derkach Blog" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="My experiences and thoughts" />
+<meta property="og:description" content="My experiences and thoughts" />
+<link rel="canonical" href="http://alexsderkach.io/talks/" />
+<meta property="og:url" content="http://alexsderkach.io/talks/" />
+<meta property="og:site_name" content="Alex’s Derkach Blog" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:site" content="@alexsderkach" />
+<meta name="twitter:creator" content="@alexsderkach" />
+<script type="application/ld+json">
+{"@context":"http://schema.org","@type":"WebPage","headline":"Alex’s Derkach Blog","author":{"@type":"Person","name":null},"description":"My experiences and thoughts","publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"http://alexsderkach.io/assets/me.png"},"name":null},"url":"http://alexsderkach.io/talks/"}</script>
+<!-- End Jekyll SEO tag -->
+
+    
+</head>
+<body>
+    <header class="padded">
+    <h3 class="title">
+        <a href="http://alexsderkach.io/" title="Home">@alexsderkach</a>
+    </h3>
+    <ul class="nav">
+        <li><a href="https://github.com/alexsderkach?tab=repositories" target="_blank">Projects</a></li>
+        <li><a href="http://alexsderkach.io/talks">Talks</a></li>
+        <li><a href="http://alexsderkach.io/me">Me</a></li>
+        <li><a href="https://twitter.com/alexsderkach" target="_blank">💬</a></li>
+    </ul>
+</header>
+    <div class="page">
+    <h1 class="page-title padded">Talks</h1>
+
+    <div class="page-body">
+
+        <article>
+            <h2>TBD: Bulding a reactive game engine with Spring 5 & Couchbase</h2>
+            <span class="meta">May 26, 2017</span>
+            <main>
+                <p>
+                    A social game, by it’s nature can spread very quickly to a large user audience. Since a game is typically interactive, the speed of retrieving information needed for the user’s interactions with the system is critical. Applications which exclusively rely on synchronous data access, very often hit a scalability wall, when things get slow and their thread pools are exhausted. New paradigms like reactive programming alleviate this and provide extensive tool sets to deal with the ever growing demands of web applications.
+                </p>
+                <p>
+                    This talk:
+                <ul>
+                    <li>Describes why Couchbase is the most appropriate solution for many video game and gaming use cases.</li>
+                    <li>Shows how to build scalable and reactive applications by making use of the Couchbase Java SDK 2.x, RxJava library and Spring Framework 5.</li>
+                </ul>
+                </p>
+                <h3>Slides</h3>
+                <div class="slides">
+                    <iframe src="//www.slideshare.net/slideshow/embed_code/key/f6KhCXQxxKwYOd" allowfullscreen> </iframe>
+                </div>
+                <h3>Video</h3>
+                <div class="youtube">
+                    TBD
+                </div>
+            </main>
+        </article>
+
+        <article>
+            <h2>Vert.x – The problem of real-time data binding</h2>
+            <span class="meta">May 21, 2016</span>
+            <main>
+                <p>
+                    As the popularity of any event-driven application increases, the number of concurrent connections may increase. Applications that employ thread-per-client architecture, frustrate scalability by exhausting a server’s memory with excessive allocations and by exhausting a server’s CPU with excessive context-switching. One of obvious solutions, is exorcising blocking operations from such applications. Vert.x is event driven and non blocking toolkit, which may help you to achive this goal. In this talk, we are going to cover it’s core features and develop a primitive application using WebSockets, RxJava and Vert.x.
+                </p>
+                <h3>Slides</h3>
+                <div class="slides">
+                    <iframe src="//www.slideshare.net/slideshow/embed_code/key/1NpsKcXBiQYX5U" allowfullscreen> </iframe>
+                </div>
+                <h3>Video</h3>
+                <div class="youtube">
+                    <iframe src="https://www.youtube.com/embed/lxr42AEHE_k" frameborder="0" allowfullscreen=""></iframe>
+                </div>
+            </main>
+        </article>
+
+    </div>
+
+</div>
+    <footer class="padded">
+    <p>
+        This blog is built with <a href="http://jekyllrb.com/">Jekyll</a> and hosted on <a href="https://pages.github.com/">GitHub Pages</a>
+        <br>
+        <a href="https://github.com/alexsderkach" class="github"><svg height="24" class="octicon octicon-mark-github" viewBox="0 0 16 16" version="1.1" width="24" aria-hidden="true"><path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg></a>
+    </p>
+</footer>
+</body>
+</html>

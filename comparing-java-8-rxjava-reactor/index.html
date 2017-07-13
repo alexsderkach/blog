@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <title>
+        
+        Comparing Java 8, RxJava, Reactor &middot; Alex's Derkach Blog
+        
+    </title>
+    <meta name="keywords" content="rxjava java8 reactor">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="http://alexsderkach.io/assets/main.css">
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=PT+Serif:400,400italic,700">
+    <!-- Icons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="http://alexsderkach.io/assets/favicons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" href="http://alexsderkach.io/assets/favicons/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="http://alexsderkach.io/assets/favicons/favicon-16x16.png" sizes="16x16">
+    <link rel="manifest" href="http://alexsderkach.io/assets/favicons/manifest.json">
+    <link rel="mask-icon" href="http://alexsderkach.io/assets/favicons/safari-pinned-tab.svg" color="#000000">
+    <meta name="theme-color" content="#ffffff">
+
+    <!-- RSS -->
+    <link rel="alternate" type="application/rss+xml" title="Alex&#39;s Derkach Blog" href="http://alexsderkach.io/feed.xml">
+
+    <!-- Begin Jekyll SEO tag v2.2.3 -->
+<meta property="og:title" content="Comparing Java 8, RxJava, Reactor" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="People often ask me: Why should I bother using RxJava or Reactor, if I can achive the same with Streams, CompletableFutures or Optionals?" />
+<meta property="og:description" content="People often ask me: Why should I bother using RxJava or Reactor, if I can achive the same with Streams, CompletableFutures or Optionals?" />
+<link rel="canonical" href="http://alexsderkach.io/comparing-java-8-rxjava-reactor/" />
+<meta property="og:url" content="http://alexsderkach.io/comparing-java-8-rxjava-reactor/" />
+<meta property="og:site_name" content="Alex’s Derkach Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2017-04-22T00:00:00+03:00" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:site" content="@alexsderkach" />
+<meta name="twitter:creator" content="@alexsderkach" />
+<script type="application/ld+json">
+{"@context":"http://schema.org","@type":"BlogPosting","headline":"Comparing Java 8, RxJava, Reactor","author":{"@type":"Person","name":null},"datePublished":"2017-04-22T00:00:00+03:00","dateModified":"2017-04-22T00:00:00+03:00","description":"People often ask me: Why should I bother using RxJava or Reactor, if I can achive the same with Streams, CompletableFutures or Optionals?","publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"http://alexsderkach.io/assets/me.png"},"name":null},"mainEntityOfPage":{"@type":"WebPage","@id":"http://alexsderkach.io/comparing-java-8-rxjava-reactor/"},"url":"http://alexsderkach.io/comparing-java-8-rxjava-reactor/"}</script>
+<!-- End Jekyll SEO tag -->
+
+    
+</head>
+<body>
+    <header class="padded">
+    <h3 class="title">
+        <a href="http://alexsderkach.io/" title="Home">@alexsderkach</a>
+    </h3>
+    <ul class="nav">
+        <li><a href="https://github.com/alexsderkach?tab=repositories" target="_blank">Projects</a></li>
+        <li><a href="http://alexsderkach.io/talks">Talks</a></li>
+        <li><a href="http://alexsderkach.io/me">Me</a></li>
+        <li><a href="https://twitter.com/alexsderkach" target="_blank">💬</a></li>
+    </ul>
+</header>
+    <div class="body">
+
+    <article>
+        <h1 class="padded">Comparing Java 8, RxJava, Reactor</h1>
+        <span class="meta padded">
+            April 22, 2017 &middot;
+            
+
+10 mins
+ read &middot;
+            <a href="http://alexsderkach.io/comparing-java-8-rxjava-reactor/#disqus_thread" itemprop="discussionUrl">0 Comments</a>
+        </span>
+        <main><p>People often ask me:</p>
+<blockquote>
+  <p>Why should I bother using RxJava or Reactor, if I can achive the same with Streams, CompletableFutures or Optionals?</p>
+</blockquote>
+
+<figure class="image">
+    
+    
+    <img async="" src="http://alexsderkach.io/assets/posts/2017-04-22-comparing-java-8-rxjava-reactor/promo.jpg" alt="Reactive Streams against the world" />
+</figure>
+
+<p>The problem is, most of the time you are solving simple tasks, and you really don’t need those libraries. But, when things get more complex, you have to write some freaky piece of code. Then this piece of code becomes more &amp; more complex and hard to maintain. RxJava and Reactor come with a lot of handy features, which would cover your demands for many years ahead. Let’s define 8 criteria, which would help us understand the difference between standard features and these libraries:</p>
+<ol>
+  <li>Composable</li>
+  <li>Lazy</li>
+  <li>Reusable</li>
+  <li>Asynchronous</li>
+  <li>Cacheable</li>
+  <li>Push or Pull</li>
+  <li>Backpressure</li>
+  <li>Operator fusion</li>
+</ol>
+
+<p>And lets define classes which we will compare:</p>
+<ol>
+  <li>CompletableFuture</li>
+  <li>Stream</li>
+  <li>Optional</li>
+  <li>Observable (RxJava 1)</li>
+  <li>Observable (RxJava 2)</li>
+  <li>Flowable (RxJava 2)</li>
+  <li>Flux (Reactor Core)</li>
+</ol>
+
+<p>Ready, steady, go!</p>
+
+<hr />
+
+<h2 id="composable">Composable</h2>
+<p>All of these classes are composable and allow us to think functionally. That’s why we love them.</p>
+
+<p><strong>CompletableFuture</strong> - a lot of <code class="highlighter-rouge">.then*()</code> methods which allow to build a pipeline, that can pass nothing or single value + throwable from stage to stage.</p>
+
+<p><strong>Stream</strong> - lots of chainable operators which allow to transform input. Can pass N values from stage to stage.</p>
+
+<p><strong>Optional</strong> - a few intermediate operators: <code class="highlighter-rouge">.map()</code>, <code class="highlighter-rouge">.flatMap()</code>, <code class="highlighter-rouge">.filter()</code>.</p>
+
+<p><strong>Observable, Flowable, Flux</strong> - same as <strong>Stream</strong></p>
+
+<hr />
+
+<h2 id="lazy">Lazy</h2>
+
+<p><strong>CompletableFuture</strong> - not lazy, since it’s just a holder of asynchronous result. These object are created to represent the work, that has already been started. It knows nothing about the work, but the result. Therefore, there is no way to go upstream and start executing pipeline from top to bottom. Next stage is executed when result is set into <code class="highlighter-rouge">CompletableFuture</code>.</p>
+
+<p><strong>Stream</strong> - all intermediate operations are lazy. All terminal operations, trigger computation.</p>
+
+<p><strong>Optional</strong> - not lazy, all operations take place immediately.</p>
+
+<p><strong>Observable, Flowable, Flux</strong> - nothing happens until there is a subscriber.</p>
+
+<hr />
+
+<h2 id="reusable">Reusable</h2>
+
+<p><strong>CompletableFuture</strong> - can be reusable, since it’s just a wrapper around a value. But with caution, since this wrapper is mutable. If you’re sure that no-one will call <code class="highlighter-rouge">.obtrude*()</code> on it, it is safe.</p>
+
+<p><strong>Stream</strong> - not reusable. As <a href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html">Java Doc states</a>:</p>
+<blockquote>
+  <p>A stream should be operated on (invoking an intermediate or terminal stream operation) only once. A stream implementation may throw IllegalStateException if it detects that the stream is being reused. However, since some stream operations may return their receiver rather than a new stream object, it may not be possible to detect reuse in all cases.</p>
+</blockquote>
+
+<p><strong>Optional</strong> - totally reusable, because it’s immutable and all work happens eagerly.</p>
+
+<p><strong>Observable, Flowable, Flux</strong> - reusable by design. All stages start execution from initial point, when there is a subscriber.</p>
+
+<hr />
+
+<h2 id="asynchronous">Asynchronous</h2>
+
+<p><strong>CompletableFuture</strong> - well, the whole point of this class is to chain work asynchronously. <code class="highlighter-rouge">CompletableFuture</code> represents a work, that is associated with some <code class="highlighter-rouge">Executor</code>. If you didn’t specify executor explicitly when creating a task, a common <code class="highlighter-rouge">ForkJoinPool</code> is used. This pool could be obtained via <code class="highlighter-rouge">ForkJoinPool.commonPool()</code> and by default it creates as many threads as many hardware threads your system has (usually number of cores, double it if your cores support hyperthreading). However, you can set the number of threads in this pool with JVM option: <code class="highlighter-rouge">-Djava.util.concurrent.ForkJoinPool.common.parallelism=?</code> or supply custom <code class="highlighter-rouge">Executor</code>, each time you create a stage of work.</p>
+
+<p><strong>Stream</strong> - no way to create asynchronous processing, but can do computations in parallel by creating parallel stream - <code class="highlighter-rouge">stream.parallel()</code>.</p>
+
+<p><strong>Optional</strong> - nope, it’s just a container.</p>
+
+<p><strong>Observable, Flowable, Flux</strong> - targeted for building asynchronous systems, but synchronous by default. <code class="highlighter-rouge">subscribeOn</code> and <code class="highlighter-rouge">observeOn</code> allow you to control the invocation of the subscription and the reception of notifications (what thread will call <code class="highlighter-rouge">onNext</code> / <code class="highlighter-rouge">onError</code> / <code class="highlighter-rouge">onCompleted</code> on your observer).</p>
+
+<p>With <code class="highlighter-rouge">subscribeOn</code> you decide on what <code class="highlighter-rouge">Scheduler</code> the <code class="highlighter-rouge">Observable.create</code> is executed. Even if you’re not calling create yourself, there is an internal equivalent to it.
+Example:</p>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><table style="border-spacing: 0"><tbody><tr><td class="gutter gl" style="text-align: right"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre></td><td class="code"><pre><span class="n">Observable</span>
+  <span class="o">.</span><span class="na">fromCallable</span><span class="o">(()</span> <span class="o">-&gt;</span> <span class="o">{</span>
+    <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"Reading on thread: "</span> <span class="o">+</span> <span class="n">currentThread</span><span class="o">().</span><span class="na">getName</span><span class="o">());</span>
+    <span class="k">return</span> <span class="nf">readFile</span><span class="o">(</span><span class="s">"input.txt"</span><span class="o">);</span>
+  <span class="o">})</span>
+  <span class="o">.</span><span class="na">map</span><span class="o">(</span><span class="n">text</span> <span class="o">-&gt;</span> <span class="o">{</span>
+    <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"Map on thread: "</span> <span class="o">+</span> <span class="n">currentThread</span><span class="o">().</span><span class="na">getName</span><span class="o">());</span>
+    <span class="k">return</span> <span class="n">text</span><span class="o">.</span><span class="na">length</span><span class="o">();</span>
+  <span class="o">})</span>
+  <span class="o">.</span><span class="na">subscribeOn</span><span class="o">(</span><span class="n">Schedulers</span><span class="o">.</span><span class="na">io</span><span class="o">())</span> <span class="c1">// &lt;-- setting scheduler</span>
+  <span class="o">.</span><span class="na">subscribe</span><span class="o">(</span><span class="n">value</span> <span class="o">-&gt;</span> <span class="o">{</span>
+     <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"Result on thread: "</span> <span class="o">+</span> <span class="n">currentThread</span><span class="o">().</span><span class="na">getName</span><span class="o">());</span>
+  <span class="o">});</span><span class="w">
+</span></pre></td></tr></tbody></table></code></pre></figure>
+
+<p>Outputs:</p>
+
+<figure class="highlight"><pre><code class="language-any" data-lang="any">Reading file on thread: RxIoScheduler-2
+Map on thread: RxIoScheduler-2
+Result on thread: RxIoScheduler-2</code></pre></figure>
+
+<p>Conversely, <code class="highlighter-rouge">observeOn()</code> controls which <code class="highlighter-rouge">Scheduler</code> is used to invoke downstream stages occurring after <code class="highlighter-rouge">observeOn()</code>.
+Example:</p>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><table style="border-spacing: 0"><tbody><tr><td class="gutter gl" style="text-align: right"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre></td><td class="code"><pre><span class="n">Observable</span>
+  <span class="o">.</span><span class="na">fromCallable</span><span class="o">(()</span> <span class="o">-&gt;</span> <span class="o">{</span>
+    <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"Reading on thread: "</span> <span class="o">+</span> <span class="n">currentThread</span><span class="o">().</span><span class="na">getName</span><span class="o">());</span>
+    <span class="k">return</span> <span class="nf">readFile</span><span class="o">(</span><span class="s">"input.txt"</span><span class="o">);</span>
+  <span class="o">})</span>
+  <span class="o">.</span><span class="na">observeOn</span><span class="o">(</span><span class="n">Schedulers</span><span class="o">.</span><span class="na">computation</span><span class="o">())</span> <span class="c1">// &lt;-- setting scheduler</span>
+  <span class="o">.</span><span class="na">map</span><span class="o">(</span><span class="n">text</span> <span class="o">-&gt;</span> <span class="o">{</span>
+    <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"Map on thread: "</span> <span class="o">+</span> <span class="n">currentThread</span><span class="o">().</span><span class="na">getName</span><span class="o">());</span>
+    <span class="k">return</span> <span class="n">text</span><span class="o">.</span><span class="na">length</span><span class="o">();</span>
+  <span class="o">})</span>
+  <span class="o">.</span><span class="na">subscribeOn</span><span class="o">(</span><span class="n">Schedulers</span><span class="o">.</span><span class="na">io</span><span class="o">())</span> <span class="c1">// &lt;-- setting scheduler</span>
+  <span class="o">.</span><span class="na">subscribe</span><span class="o">(</span><span class="n">value</span> <span class="o">-&gt;</span> <span class="o">{</span>
+     <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"Result on thread: "</span> <span class="o">+</span> <span class="n">currentThread</span><span class="o">().</span><span class="na">getName</span><span class="o">());</span>
+  <span class="o">});</span><span class="w">
+</span></pre></td></tr></tbody></table></code></pre></figure>
+
+<p>Outputs:</p>
+
+<figure class="highlight"><pre><code class="language-any" data-lang="any">Reading file on thread: RxIoScheduler-2
+Map on thread: RxComputationScheduler-1
+Result on thread: RxComputationScheduler-1</code></pre></figure>
+
+<hr />
+
+<h2 id="cacheable">Cacheable</h2>
+
+<p>What is the difference between reusable and cacheable? Lets say we have pipeline <code class="highlighter-rouge">A</code>, and re-use it two times to create pipelines <code class="highlighter-rouge">B = A + 🔴</code> and <code class="highlighter-rouge">C = A + 🔵</code> from it.</p>
+<ul>
+  <li>If <code class="highlighter-rouge">B</code> &amp; <code class="highlighter-rouge">C</code> complete successfully, then class is reusable.</li>
+  <li>If <code class="highlighter-rouge">B</code> &amp; <code class="highlighter-rouge">C</code> complete successfully and every stage of pipeline <code class="highlighter-rouge">A</code> is invoked only once, then class is cacheable. To be cacheable, class must be reusable.</li>
+</ul>
+
+<p><strong>CompletableFuture</strong> - same answer as for reusability.</p>
+
+<p><strong>Stream</strong> - no way to cache intermediate result, unless invoke terminal operation.</p>
+
+<p><strong>Optional</strong> - ‘cacheable’, because all work happens eagerly.</p>
+
+<p><strong>Observable, Flowable, Flux</strong> - not cached by default. But you can convert <code class="highlighter-rouge">A</code> to cached by calling  <code class="highlighter-rouge">.cache()</code> on it.</p>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><table style="border-spacing: 0"><tbody><tr><td class="gutter gl" style="text-align: right"><pre class="lineno">1
+2
+3
+4
+5
+6</pre></td><td class="code"><pre><span class="n">Observable</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;</span> <span class="n">work</span> <span class="o">=</span> <span class="n">Observable</span><span class="o">.</span><span class="na">fromCallable</span><span class="o">(()</span> <span class="o">-&gt;</span> <span class="o">{</span>
+  <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Doing some work"</span><span class="o">);</span>
+  <span class="k">return</span> <span class="mi">10</span><span class="o">;</span>
+<span class="o">});</span>
+<span class="n">work</span><span class="o">.</span><span class="na">subscribe</span><span class="o">(</span><span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">::</span><span class="n">println</span><span class="o">);</span>
+<span class="n">work</span><span class="o">.</span><span class="na">map</span><span class="o">(</span><span class="n">i</span> <span class="o">-&gt;</span> <span class="n">i</span> <span class="o">*</span> <span class="mi">2</span><span class="o">).</span><span class="na">subscribe</span><span class="o">(</span><span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">::</span><span class="n">println</span><span class="o">);</span><span class="w">
+</span></pre></td></tr></tbody></table></code></pre></figure>
+
+<p>Outputs:</p>
+
+<figure class="highlight"><pre><code class="language-any" data-lang="any">Doing some work
+10
+Doing some work
+20</code></pre></figure>
+
+<p>With <code class="highlighter-rouge">cache()</code>:</p>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><table style="border-spacing: 0"><tbody><tr><td class="gutter gl" style="text-align: right"><pre class="lineno">1
+2
+3
+4
+5
+6</pre></td><td class="code"><pre><span class="n">Observable</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;</span> <span class="n">work</span> <span class="o">=</span> <span class="n">Observable</span><span class="o">.</span><span class="na">fromCallable</span><span class="o">(()</span> <span class="o">-&gt;</span> <span class="o">{</span>
+  <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Doing some work"</span><span class="o">);</span>
+  <span class="k">return</span> <span class="mi">10</span><span class="o">;</span>
+<span class="o">}).</span><span class="na">cache</span><span class="o">();</span> <span class="c1">// &lt;- apply caching</span>
+<span class="n">work</span><span class="o">.</span><span class="na">subscribe</span><span class="o">(</span><span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">::</span><span class="n">println</span><span class="o">);</span>
+<span class="n">work</span><span class="o">.</span><span class="na">map</span><span class="o">(</span><span class="n">i</span> <span class="o">-&gt;</span> <span class="n">i</span> <span class="o">*</span> <span class="mi">2</span><span class="o">).</span><span class="na">subscribe</span><span class="o">(</span><span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">::</span><span class="n">println</span><span class="o">);</span><span class="w">
+</span></pre></td></tr></tbody></table></code></pre></figure>
+
+<p>Outputs:</p>
+
+<figure class="highlight"><pre><code class="language-any" data-lang="any">Doing some work
+10
+20</code></pre></figure>
+
+<hr />
+
+<h2 id="push-or-pull">Push or Pull</h2>
+<p><strong>Stream</strong> &amp; <strong>Optional</strong> are pull based. You pull the result from pipeline by calling different methods (<code class="highlighter-rouge">.get()</code>, <code class="highlighter-rouge">.collect()</code>, etc.).
+Pull is often associated with blocking, synchronous and that is fair. You call a method and thread starts waiting for the data to arrive. Thread is blocked until arrival.</p>
+
+<p><strong>CompletableFuture</strong>, <strong>Observable</strong>, <strong>Flowable</strong>, <strong>Flux</strong> are push based. You subscribe to pipeline and you will get notified when there is something to process.
+Push is often associated with non-blocking, asynchronous. You can do anything while the pipeline is executing in some thread. You’ve already described a code to execute and notification will trigger execution of this code as next stage.</p>
+
+<hr />
+
+<h2 id="backpressure">Backpressure</h2>
+
+<p><strong><em>In order to have back-pressure, pipeline must be push-based.</em></strong></p>
+
+<p><strong>Backpressure</strong> describes a situation in pipeline, when some asynchronous stages can’t process the values fast enough and need a way to tell the upstream producing stage to slow down.
+It’s unacceptable for stage to fail, because there’s too much data.</p>
+
+<figure class="image">
+    
+    
+    <img async="" src="http://alexsderkach.io/assets/posts/2017-04-22-comparing-java-8-rxjava-reactor/backpressure.jpg" alt="Backpressure" />
+</figure>
+
+<ul>
+  <li><strong>Stream</strong> &amp; <strong>Optional</strong> don’t support this, since they are pull based.</li>
+  <li><strong>CompletableFuture</strong> doesn’t need to solve it, since it produces 0 or 1 result.</li>
+</ul>
+
+<p><strong>Observable (RxJava 1)</strong>, <strong>Flowable</strong>, <strong>Flux</strong> - solve it. Common strategies are:</p>
+<ul>
+  <li><strong>Buffering</strong> - buffer all <code class="highlighter-rouge">onNext</code> values until the downstream consumes it.</li>
+  <li><strong>Drop Recent</strong> - drop the most recent <code class="highlighter-rouge">onNext</code> value if the downstream can’t keep up.</li>
+  <li><strong>Use Latest</strong> - supply only the latest <code class="highlighter-rouge">onNext</code> value, overwriting any previous value if the downstream can’t keep up.</li>
+  <li><strong>None</strong> - <code class="highlighter-rouge">onNext</code> events are written without any buffering or dropping.</li>
+  <li><strong>Exception</strong> - signal an exception in case the downstream can’t keep up.</li>
+</ul>
+
+<p><strong>Observable (RxJava 2)</strong> - doesn’t solve it. Many users of RxJava 1 used <code class="highlighter-rouge">Observable</code> for events that cannot reasonably be backpressured or didn’t use strategies to resolve it, which cased unexpected exceptions. Therefore, <strong><em>RxJava 2</em></strong> created clear separation between backpressured (<code class="highlighter-rouge">Flowable</code>) and non-backpressured (<code class="highlighter-rouge">Observable</code>) classes.</p>
+
+<hr />
+
+<h2 id="operator-fusion">Operator Fusion</h2>
+
+<p>The idea is to modify the chain of stages at various lifecycle points, in order to remove overhead created by architecture of library.
+All these optimizations are done internally, so that everything is transparent for end-user.</p>
+
+<p>Only <strong>RxJava 2</strong> &amp; <strong>Reactor</strong> support it, but differently.
+In general, there are 2 types of optimizations:</p>
+<ul>
+  <li>Macro-fusion - replacing 2+ subsequent operators with a single operator.</li>
+</ul>
+
+<figure class="image">
+    
+    
+    <img async="" src="http://alexsderkach.io/assets/posts/2017-04-22-comparing-java-8-rxjava-reactor/macro-fusion.png" alt="Macro-fusion" />
+</figure>
+
+<ul>
+  <li>Micro-fusion - operators that end in an output queue and operators starting with a front-queue could share the same queue instance.
+As an example, instead of calling <code class="highlighter-rouge">request(1)</code> and then handling <code class="highlighter-rouge">onNext()</code>:</li>
+</ul>
+
+<figure class="image">
+    
+    
+    <img async="" src="http://alexsderkach.io/assets/posts/2017-04-22-comparing-java-8-rxjava-reactor/micro-fusion-1.png" alt="Micro-fusion" />
+</figure>
+
+<p>subscriber can poll for value from parent observable:</p>
+
+<figure class="image">
+    
+    
+    <img async="" src="http://alexsderkach.io/assets/posts/2017-04-22-comparing-java-8-rxjava-reactor/micro-fusion-2.png" alt="Micro-fusion" />
+</figure>
+
+<p>More detailed information can be found here: <a href="http://akarnokd.blogspot.com/2016/03/operator-fusion-part-1.html">Part 1</a> &amp; <a href="http://akarnokd.blogspot.com/2016/04/operator-fusion-part-2-final.html">Part 2</a></p>
+
+<hr />
+
+<h1 id="conclusion">Conclusion</h1>
+
+<figure class="image">
+    
+    
+    <img async="" src="http://alexsderkach.io/assets/posts/2017-04-22-comparing-java-8-rxjava-reactor/conclusion.png" alt="Comparison" />
+</figure>
+
+<p><code class="highlighter-rouge">Stream</code>, <code class="highlighter-rouge">CompletableFuture</code> and <code class="highlighter-rouge">Optional</code> were created to solve specific problems. And they are really good at solving these problems.
+If they cover your needs, you are good to go.</p>
+
+<p>However, different problems have different complexity and some of them require new techniques.
+<strong>RxJava &amp; Reactor</strong> are universal tools, that will help you to solve your problems declaratively, instead of creating <strong><em>‘a hack’</em></strong> with tools that weren’t designed to solve such problems.</p>
+</main>
+        <div class="share-page padded">
+            Share this on &rarr;
+            <a href="https://twitter.com/intent/tweet?text=Comparing Java 8, RxJava, Reactor&url=http://alexsderkach.io/comparing-java-8-rxjava-reactor/&via=alexsderkach&related=alexsderkach" rel="nofollow" target="_blank" title="Share on Twitter">Twitter</a>
+            <a href="https://facebook.com/sharer.php?u=http://alexsderkach.io/comparing-java-8-rxjava-reactor/" rel="nofollow" target="_blank" title="Share on Facebook">Facebook</a>
+            <a href="https://plus.google.com/share?url=http://alexsderkach.io/comparing-java-8-rxjava-reactor/" rel="nofollow" target="_blank" title="Share on Google+">Google+</a>
+        </div>
+    </article>
+
+    <div class="padded">
+        
+
+        <script id="dsq-count-scr" src="//alexsderkach.disqus.com/count.js" async></script>
+    </div>
+</div>
+    <footer class="padded">
+    <p>
+        This blog is built with <a href="http://jekyllrb.com/">Jekyll</a> and hosted on <a href="https://pages.github.com/">GitHub Pages</a>
+        <br>
+        <a href="https://github.com/alexsderkach" class="github"><svg height="24" class="octicon octicon-mark-github" viewBox="0 0 16 16" version="1.1" width="24" aria-hidden="true"><path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg></a>
+    </p>
+</footer>
+</body>
+</html>

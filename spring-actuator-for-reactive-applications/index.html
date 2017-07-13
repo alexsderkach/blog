@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <title>
+        
+        Spring Actuator for Reactive Applications &middot; Alex's Derkach Blog
+        
+    </title>
+    <meta name="keywords" content="rxjava spring reactive">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="http://alexsderkach.io/assets/main.css">
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=PT+Serif:400,400italic,700">
+    <!-- Icons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="http://alexsderkach.io/assets/favicons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" href="http://alexsderkach.io/assets/favicons/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="http://alexsderkach.io/assets/favicons/favicon-16x16.png" sizes="16x16">
+    <link rel="manifest" href="http://alexsderkach.io/assets/favicons/manifest.json">
+    <link rel="mask-icon" href="http://alexsderkach.io/assets/favicons/safari-pinned-tab.svg" color="#000000">
+    <meta name="theme-color" content="#ffffff">
+
+    <!-- RSS -->
+    <link rel="alternate" type="application/rss+xml" title="Alex&#39;s Derkach Blog" href="http://alexsderkach.io/feed.xml">
+
+    <!-- Begin Jekyll SEO tag v2.2.3 -->
+<meta property="og:title" content="Spring Actuator for Reactive Applications" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="My experiences and thoughts" />
+<meta property="og:description" content="My experiences and thoughts" />
+<link rel="canonical" href="http://alexsderkach.io/spring-actuator-for-reactive-applications/" />
+<meta property="og:url" content="http://alexsderkach.io/spring-actuator-for-reactive-applications/" />
+<meta property="og:site_name" content="Alex’s Derkach Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2017-07-12T00:00:00+03:00" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:site" content="@alexsderkach" />
+<meta name="twitter:creator" content="@alexsderkach" />
+<script type="application/ld+json">
+{"@context":"http://schema.org","@type":"BlogPosting","headline":"Spring Actuator for Reactive Applications","author":{"@type":"Person","name":null},"datePublished":"2017-07-12T00:00:00+03:00","dateModified":"2017-07-12T00:00:00+03:00","description":"My experiences and thoughts","publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"http://alexsderkach.io/assets/me.png"},"name":null},"mainEntityOfPage":{"@type":"WebPage","@id":"http://alexsderkach.io/spring-actuator-for-reactive-applications/"},"url":"http://alexsderkach.io/spring-actuator-for-reactive-applications/"}</script>
+<!-- End Jekyll SEO tag -->
+
+    
+</head>
+<body>
+    <header class="padded">
+    <h3 class="title">
+        <a href="http://alexsderkach.io/" title="Home">@alexsderkach</a>
+    </h3>
+    <ul class="nav">
+        <li><a href="https://github.com/alexsderkach?tab=repositories" target="_blank">Projects</a></li>
+        <li><a href="http://alexsderkach.io/talks">Talks</a></li>
+        <li><a href="http://alexsderkach.io/me">Me</a></li>
+        <li><a href="https://twitter.com/alexsderkach" target="_blank">💬</a></li>
+    </ul>
+</header>
+    <div class="body">
+
+    <article>
+        <h1 class="padded">Spring Actuator for Reactive Applications</h1>
+        <span class="meta padded">
+            July 12, 2017 &middot;
+            
+
+6 mins
+ read &middot;
+            <a href="http://alexsderkach.io/spring-actuator-for-reactive-applications/#disqus_thread" itemprop="discussionUrl">0 Comments</a>
+        </span>
+        <main>
+<figure class="image">
+    
+    
+    <img async="" src="http://alexsderkach.io/assets/posts/2017-07-12-spring-actuator-for-reactive-applications/header.jpg" alt="Spring Boot Actuator + RxJava" />
+</figure>
+
+<p>You’ve seen this piece of code, don’t you?</p>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><table style="border-spacing: 0"><tbody><tr><td class="gutter gl" style="text-align: right"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre></td><td class="code"><pre><span class="nd">@Service</span>
+<span class="kd">class</span> <span class="nc">UserService</span> <span class="o">{</span>
+    
+    <span class="o">...</span>
+    
+    <span class="nd">@Metered</span><span class="o">(</span><span class="s">"UserService.register"</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="n">User</span> <span class="nf">register</span><span class="o">(</span><span class="n">RegistrationForm</span> <span class="n">form</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">validate</span><span class="o">(</span><span class="n">form</span><span class="o">);</span>
+        <span class="n">User</span> <span class="n">user</span> <span class="o">=</span> <span class="n">createUser</span><span class="o">(</span><span class="n">form</span><span class="o">);</span>
+        <span class="k">return</span> <span class="n">user</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span><span class="w">
+</span></pre></td></tr></tbody></table></code></pre></figure>
+
+<p>Every operation in this method is synchronous, and is executed sequentially.
+Since next operation does not occur until previous is finished, we can easily calculate time of method execution with <strong>Around Advice</strong>:</p>
+
+<p><em>Execution time = TS of method return - TS of method call</em></p>
+
+<p>If we would like to count successful executions of method, we would use <strong>After Returning Advice</strong>.
+If we would like to count failed executions of method, we would use <strong>After Throwing Advice</strong>.
+Both advices will increment some counter.</p>
+
+<p>But, what happens when we become reactive?</p>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><table style="border-spacing: 0"><tbody><tr><td class="gutter gl" style="text-align: right"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre></td><td class="code"><pre><span class="nd">@Service</span>
+<span class="kd">class</span> <span class="nc">UserService</span> <span class="o">{</span>
+    
+    <span class="o">...</span>
+    
+    <span class="nd">@Metered</span><span class="o">(</span><span class="s">"UserService.register"</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="n">Single</span><span class="o">&lt;</span><span class="n">User</span><span class="o">&gt;</span> <span class="nf">register</span><span class="o">(</span><span class="n">RegistrationForm</span> <span class="n">form</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="nf">validate</span><span class="o">(</span><span class="n">form</span><span class="o">)</span>
+              <span class="o">.</span><span class="na">andThen</span><span class="o">(</span><span class="n">createUser</span><span class="o">(</span><span class="n">form</span><span class="o">));</span>
+    <span class="o">}</span>
+<span class="o">}</span><span class="w">
+</span></pre></td></tr></tbody></table></code></pre></figure>
+
+<p>Register 10K user, open <a href="https://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-endpoints.html">Spring Actuator’s</a> <em>/metrics</em> endpoint, and you will see the following:</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><table style="border-spacing: 0"><tbody><tr><td class="gutter gl" style="text-align: right"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre></td><td class="code"><pre><span class="p">{</span>
+    <span class="p">...</span>
+    <span class="s2">"timer.UserService.register.count"</span><span class="err">:</span> <span class="mi">10000</span><span class="p">,</span>
+    <span class="s2">"timer.UserService.register.snapshot.75thPercentile"</span><span class="err">:</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="s2">"timer.UserService.register.snapshot.95thPercentile"</span><span class="err">:</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="s2">"timer.UserService.register.snapshot.98thPercentile"</span><span class="err">:</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="s2">"timer.UserService.register.snapshot.999thPercentile"</span><span class="err">:</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="s2">"timer.UserService.register.snapshot.99thPercentile"</span><span class="err">:</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="s2">"timer.UserService.register.snapshot.max"</span><span class="err">:</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="s2">"timer.UserService.register.snapshot.mean"</span><span class="err">:</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="s2">"timer.UserService.register.snapshot.median"</span><span class="err">:</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="s2">"timer.UserService.register.snapshot.min"</span><span class="err">:</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="s2">"timer.UserService.register.snapshot.stdDev"</span><span class="err">:</span> <span class="mi">0</span>
+    <span class="p">...</span>
+<span class="p">}</span><span class="w">
+</span></pre></td></tr></tbody></table></code></pre></figure>
+
+<figure class="image">
+    
+    
+    <img async="" src="http://alexsderkach.io/assets/posts/2017-07-12-spring-actuator-for-reactive-applications/flash.gif" alt="" />
+</figure>
+
+<p>Is my code really that fast? Nope.</p>
+
+<p>The problem with advices, is that they expect synchronous execution:</p>
+<ol>
+  <li>Save current timestamp</li>
+  <li>Call method &amp; save result to variable</li>
+  <li>Calculate diff with timestamp in Step 1</li>
+  <li>Return result from Step 2</li>
+</ol>
+
+<p>When these expectations are applied to reactive application, existing advices useless - they monitor the synchronous part of reactive libraries - <strong>chain creation</strong>.
+Of course the speed of creating a chain with 2 operations is &lt; 1 millisecond.</p>
+
+<p>To solve this problem, we need create an advice which will use action methods of the source:</p>
+
+<ul>
+  <li>Single -&gt; doOnError, doOnSuccess</li>
+  <li>Completable -&gt; doOnError, doOnCompleted</li>
+  <li>Observable -&gt; doOnError, doOnCompleted</li>
+</ul>
+
+<p>If you would like to monitor execution time, number of successful calls, errors on some sub-sequence of operators, where last operator returns <em>Single</em>, first of all, you would need pointcuts:</p>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><table style="border-spacing: 0"><tbody><tr><td class="gutter gl" style="text-align: right"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19</pre></td><td class="code"><pre><span class="nd">@Aspect</span> <span class="nd">@Component</span> <span class="nd">@RequiredArgsConstructor</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">RxMeteredAspect</span> <span class="o">{</span>
+
+    <span class="kd">private</span> <span class="kd">final</span> <span class="n">GaugeService</span> <span class="n">gaugeService</span><span class="o">;</span>        <span class="c1">// Actuator's bean for storage and analysis of values</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="n">CounterService</span> <span class="n">counterService</span><span class="o">;</span>    <span class="c1">// Actuator's bean for monitoring counters</span>
+    
+    <span class="o">...</span>
+    
+    <span class="nd">@Pointcut</span><span class="o">(</span><span class="s">"@annotation(Metered)"</span><span class="o">)</span>               <span class="c1">// Everything with @Metered annotation</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">metered</span><span class="o">()</span> <span class="o">{</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Pointcut</span><span class="o">(</span><span class="s">"execution(public rx.Single *(..))"</span><span class="o">)</span>  <span class="c1">// Every public method which returns Single</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">single</span><span class="o">()</span> <span class="o">{</span>
+    <span class="o">}</span>
+    
+    <span class="o">...</span>
+    
+<span class="o">}</span><span class="w">
+</span></pre></td></tr></tbody></table></code></pre></figure>
+
+<p>Then, you can implement an advice with created pointcuts:</p>
+
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><table style="border-spacing: 0"><tbody><tr><td class="gutter gl" style="text-align: right"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23</pre></td><td class="code"><pre>    <span class="o">...</span>
+    
+    <span class="nd">@Around</span><span class="o">(</span><span class="s">"metered() &amp;&amp; single()"</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="n">Object</span> <span class="nf">profileSingle</span><span class="o">(</span><span class="n">ProceedingJoinPoint</span> <span class="n">proceedingJoinPoint</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">RxMetered</span> <span class="n">annotation</span> <span class="o">=</span> <span class="n">getAnnotation</span><span class="o">(</span><span class="n">proceedingJoinPoint</span><span class="o">);</span>          <span class="c1">// extract annotation from method</span>
+        <span class="n">String</span> <span class="n">metricName</span> <span class="o">=</span> <span class="n">annotation</span><span class="o">.</span><span class="na">value</span><span class="o">();</span>                             <span class="c1">// extract name for metric</span>
+        <span class="k">return</span> <span class="nf">fromCallable</span><span class="o">(</span><span class="nl">System:</span><span class="o">:</span><span class="n">currentTimeMillis</span><span class="o">)</span>                      <span class="c1">// create lazy timestamp provider</span>
+            <span class="o">.</span><span class="na">flatMap</span><span class="o">(</span><span class="n">startTs</span> <span class="o">-&gt;</span> <span class="o">((</span><span class="n">Single</span><span class="o">)</span> <span class="n">proceedingJoinPoint</span><span class="o">.</span><span class="na">proceed</span><span class="o">())</span>    <span class="c1">// call method which we're monitoring</span>
+                <span class="c1">// track time + number of successful executions</span>
+                <span class="o">.</span><span class="na">doOnSuccess</span><span class="o">(</span><span class="n">result</span> <span class="o">-&gt;</span> <span class="o">{</span>
+                    <span class="k">if</span> <span class="o">(</span><span class="n">annotation</span><span class="o">.</span><span class="na">timed</span><span class="o">())</span> <span class="o">{</span>
+                        <span class="c1">// no need to increment counter, since timer.* generates counters too</span>
+                        <span class="n">gaugeService</span><span class="o">.</span><span class="na">submit</span><span class="o">(</span><span class="s">"timer."</span> <span class="o">+</span> <span class="n">metricName</span><span class="o">,</span> <span class="n">currentTimeMillis</span><span class="o">()</span> <span class="o">-</span> <span class="n">startTs</span><span class="o">);</span>
+                    <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+                        <span class="n">counterService</span><span class="o">.</span><span class="na">increment</span><span class="o">(</span><span class="s">"meter."</span> <span class="o">+</span> <span class="n">metricName</span><span class="o">);</span>
+                    <span class="o">}</span>
+                <span class="o">})</span>
+                <span class="c1">// track number of failed executions</span>
+                <span class="o">.</span><span class="na">doOnError</span><span class="o">(</span><span class="n">e</span> <span class="o">-&gt;</span> <span class="n">counterService</span><span class="o">.</span><span class="na">increment</span><span class="o">(</span><span class="s">"meter."</span> <span class="o">+</span> <span class="n">metricName</span> <span class="o">+</span> <span class="s">".errorCount"</span><span class="o">))</span>
+            <span class="o">);</span>
+    <span class="o">}</span>
+    
+    <span class="o">...</span><span class="w">
+</span></pre></td></tr></tbody></table></code></pre></figure>
+
+<p>Execute 3 requests and open <em>/metrics</em> endpoint again. You will see realistic results:</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><table style="border-spacing: 0"><tbody><tr><td class="gutter gl" style="text-align: right"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre></td><td class="code"><pre><span class="p">{</span>
+    <span class="p">...</span>
+    <span class="s2">"timer.UserService.register.count"</span><span class="err">:</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="s2">"timer.UserService.register.snapshot.75thPercentile"</span><span class="err">:</span> <span class="mi">31</span><span class="p">,</span>
+    <span class="s2">"timer.UserService.register.snapshot.95thPercentile"</span><span class="err">:</span> <span class="mi">31</span><span class="p">,</span>
+    <span class="s2">"timer.UserService.register.snapshot.98thPercentile"</span><span class="err">:</span> <span class="mi">31</span><span class="p">,</span>
+    <span class="s2">"timer.UserService.register.snapshot.999thPercentile"</span><span class="err">:</span> <span class="mi">38</span><span class="p">,</span>
+    <span class="s2">"timer.UserService.register.snapshot.99thPercentile"</span><span class="err">:</span> <span class="mi">31</span><span class="p">,</span>
+    <span class="s2">"timer.UserService.register.snapshot.max"</span><span class="err">:</span> <span class="mi">341</span><span class="p">,</span>
+    <span class="s2">"timer.UserService.register.snapshot.mean"</span><span class="err">:</span> <span class="mi">31</span><span class="p">,</span>
+    <span class="s2">"timer.UserService.register.snapshot.median"</span><span class="err">:</span> <span class="mi">31</span><span class="p">,</span>
+    <span class="s2">"timer.UserService.register.snapshot.min"</span><span class="err">:</span> <span class="mi">31</span><span class="p">,</span>
+    <span class="s2">"timer.UserService.register.snapshot.stdDev"</span><span class="err">:</span> <span class="mi">8</span>
+    <span class="p">...</span>
+<span class="p">}</span><span class="w">
+</span></pre></td></tr></tbody></table></code></pre></figure>
+
+<p>The same can be implemented for any class, of any reactive library, since all of them provide action methods.</p>
+
+<h2 id="conclusion">Conclusion</h2>
+<p>Spring has a big ecosystem and is currently moving towards reactive paradigm.
+Users are already familiar and very comfortable with declarative capabilities of this framework.
+Reactive paradigm is absolutely a different way of developing applications when compared to existing Spring Applications.
+Could Spring stay as declarative as it is now, and make a shift?
+It could, but still requires a little bit of development.</p>
+</main>
+        <div class="share-page padded">
+            Share this on &rarr;
+            <a href="https://twitter.com/intent/tweet?text=Spring Actuator for Reactive Applications&url=http://alexsderkach.io/spring-actuator-for-reactive-applications/&via=alexsderkach&related=alexsderkach" rel="nofollow" target="_blank" title="Share on Twitter">Twitter</a>
+            <a href="https://facebook.com/sharer.php?u=http://alexsderkach.io/spring-actuator-for-reactive-applications/" rel="nofollow" target="_blank" title="Share on Facebook">Facebook</a>
+            <a href="https://plus.google.com/share?url=http://alexsderkach.io/spring-actuator-for-reactive-applications/" rel="nofollow" target="_blank" title="Share on Google+">Google+</a>
+        </div>
+    </article>
+
+    <div class="padded">
+        
+
+        <script id="dsq-count-scr" src="//alexsderkach.disqus.com/count.js" async></script>
+    </div>
+</div>
+    <footer class="padded">
+    <p>
+        This blog is built with <a href="http://jekyllrb.com/">Jekyll</a> and hosted on <a href="https://pages.github.com/">GitHub Pages</a>
+        <br>
+        <a href="https://github.com/alexsderkach" class="github"><svg height="24" class="octicon octicon-mark-github" viewBox="0 0 16 16" version="1.1" width="24" aria-hidden="true"><path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg></a>
+    </p>
+</footer>
+</body>
+</html>
