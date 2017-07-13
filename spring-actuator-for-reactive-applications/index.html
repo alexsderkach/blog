@@ -198,7 +198,7 @@ Both advices will increment some counter.</p>
   <li>Return result from Step 2</li>
 </ol>
 
-<p>When these expectations are applied to reactive application, existing advices useless - they monitor the synchronous part of reactive libraries - <strong>chain creation</strong>.
+<p>When these expectations are applied to reactive application, existing advices become useless - they monitor the synchronous part of reactive libraries - <strong>chain creation</strong>.
 Of course the speed of creating a chain with 2 operations is &lt; 1 millisecond.</p>
 
 <p>To solve this problem, we need create an advice which will use action methods of the source:</p>
