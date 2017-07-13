@@ -2,15 +2,59 @@ figure {
   margin: 0;
 }
 
-.highlight {
+.jupyter-notebook {
+  .hl-ipython3 pre {
+    font-size: 80%;
+  }
+  .cell {
+    @extend .padded;
+    padding: 0;
+  }
+  .prompt {
+      padding: 0.5em 0.5em 0 0;
+      border-right: 0.163em solid #dedede;
+      color: #999;
+      white-space: pre;
+      display: table-cell;
+      min-width: 60px;
+      text-align: right;
+      font-family: $codeFontFamily;
+      font-size: 70%;
+      &.input_prompt {
+        border-right: 0.163em solid #185f65;
+      }
+  }
+  .inner_cell, .output_subarea {
+      vertical-align: top;
+      display: table-cell;
+      padding: 0.5em 0;        
+      img {
+        padding: 0 1.25rem;        
+        display: block;
+        margin: auto;
+        max-height: 400px;
+      }
+      &.output_jpeg {
+        text-align: center;
+      }
+  }
+  .output {
+    margin-top: 10px;
+      background-color: #fafafd;
+  }
+}
+figure.highlight, .jupyter-notebook {
   margin-bottom: 1rem;
   padding: 1rem 1.25rem;
   background-color: #fafafd;
   width: 100%;
+  font-size: 80%;
   overflow: auto;
-  .language-java {
-    font-size: 70% !important;
-  }
+  border-bottom: 0.063em solid #dedede;
+  border-top: 0.063em solid #dedede;
+  font-family: $gistFontFamily;
+}
+figure.highlight {
   > pre {
     padding: 0;
     margin-bottom: 0;
@@ -31,9 +75,6 @@ figure {
     display: block;
     padding: 0 1.5rem;
   }
-  border-bottom: 0.063em solid #dedede;
-  border-top: 0.063em solid #dedede;
-  font-family: $gistFontFamily;
 }
 
 .gist {
@@ -99,7 +140,6 @@ pre {
   code {
     padding: 0;
     color: inherit;
-    font-size: 80%;
     background-color: transparent;
   }
 }
