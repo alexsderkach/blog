@@ -1,0 +1,20 @@
+language: ruby
+rvm:
+ - 2.2
+
+branches:
+  only:
+    - master
+env:
+  global:
+    - secure: "Ws0PFR06/AqP5hP5ifGmJn8FiZj63Rje0byveKSnlpeuw4kpcaSVYBrmD3alXctOWhSuqrJ2Hk210ErrZ60bvMbzSsoeFWeCc4humtm8t7bAEnXL1qJda+PUq/PtMPZcnfLXEahPEJAy40fYi7B8o2ML+abthZnOFhZsqVWNuoJQKhrBGZZud2pa6TKC0mPFsdiGIghEcWAioWtl44x7+4y8xTxl19DcnXhaqmObSoNPi34p0iBE/Og3COmOJpN1n1ntCXx2yZpyMfRz9SWEc8FUnNSzZTeOfvxVGeSjCq9PGDkFbZ2bWGHWMGg9PaBycVSlcqmpjKXPlgiL+agkHi/igCAzvJb+WpW7TGmVnef78FPo9wEv2iDGuHZwGBzeFpEPGfLzx2nJCN2iaiOZUu6gXMzziUa3CuEwC3bGBsNsSLgD79FR9EEPvAkNZBpu7/DR7ZphzjzYVBx0YE6Ubs4CwDfQylY3KshQXp6MxHdgzf0P/1tAXhULW6kh9XNt4geQNkFAQPHqN0UYlkBKNBhmGWn4UCYV1GEtii5FazzaOdnGc1wL64mgS0ZJKilkyV2E0Psgh+4+w4thiyHPgnTJM0zevuOIhtfATU9aC3euDqKBGgq88+Al2rYCtDV54OewXwWo0XSp2SO/X4KYeUibLp/K9FMHynxauWwaARM="
+
+before_install:
+  - git config --global user.email "travis@alexsderkach.io"
+  - git config --global user.name "travis"
+
+install:
+  - bundle
+script:
+  - export JEKYLL_ENV=production
+  - jgd -u http://alexsderkach:$PASSWORD@github.com/alexsderkach/blog.git
