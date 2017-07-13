@@ -77,7 +77,7 @@ The problem with advices, is that they expect synchronous execution:
 3. Calculate diff with timestamp in Step 1
 4. Return result from Step 2
 
-When these expectations are applied to reactive application, existing advices useless - they monitor the synchronous part of reactive libraries - **chain creation**.
+When these expectations are applied to reactive application, existing advices become useless - they monitor the synchronous part of reactive libraries - **chain creation**.
 Of course the speed of creating a chain with 2 operations is < 1 millisecond.
 
 To solve this problem, we need create an advice which will use action methods of the source:
