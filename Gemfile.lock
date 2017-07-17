@@ -30,6 +30,9 @@ GEM
       jekyll (~> 3.3)
     jekyll-watch (1.5.0)
       listen (~> 3.0, < 3.1)
+    jgd (1.9)
+      jekyll (>= 1.5.1)
+      trollop (= 2.1.2)
     kramdown (1.14.0)
     liquid (3.0.6)
     listen (3.0.8)
@@ -52,6 +55,7 @@ GEM
     rouge (1.11.1)
     safe_yaml (1.0.4)
     sass (3.4.24)
+    trollop (2.1.2)
 
 PLATFORMS
   ruby
@@ -62,6 +66,7 @@ DEPENDENCIES
   jekyll-octicons
   jekyll-seo-tag
   jekyll-sitemap
+  jgd
   minima
 
 RUBY VERSION
