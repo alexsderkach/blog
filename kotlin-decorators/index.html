@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <title>
+        
+        Kotlin Decorators &middot; Alex's Derkach Blog
+        
+    </title>
+    <meta name="keywords" content="kotlin patterns">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="http://alexsderkach.io/assets/main.css">
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=PT+Serif:400,400italic,700">
+    <!-- Icons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="http://alexsderkach.io/assets/favicons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" href="http://alexsderkach.io/assets/favicons/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="http://alexsderkach.io/assets/favicons/favicon-16x16.png" sizes="16x16">
+    <link rel="manifest" href="http://alexsderkach.io/assets/favicons/manifest.json">
+    <link rel="mask-icon" href="http://alexsderkach.io/assets/favicons/safari-pinned-tab.svg" color="#000000">
+    <meta name="theme-color" content="#ffffff">
+
+    <!-- RSS -->
+    <link rel="alternate" type="application/rss+xml" title="Alex&#39;s Derkach Blog" href="http://alexsderkach.io/feed.xml">
+
+    <!-- Begin Jekyll SEO tag v2.2.3 -->
+<meta property="og:title" content="Kotlin Decorators" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="2 years ago, I was working for a small company as Java dev. My place was situated very closely to a different team, who were doing a Python project. Every week someone from their team was screening a candidate. A question, which I would hear everytime was: “What is a decorator in Python?”" />
+<meta property="og:description" content="2 years ago, I was working for a small company as Java dev. My place was situated very closely to a different team, who were doing a Python project. Every week someone from their team was screening a candidate. A question, which I would hear everytime was: “What is a decorator in Python?”" />
+<link rel="canonical" href="http://alexsderkach.io/kotlin-decorators/" />
+<meta property="og:url" content="http://alexsderkach.io/kotlin-decorators/" />
+<meta property="og:site_name" content="Alex’s Derkach Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2017-11-24T00:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:site" content="@alexsderkach" />
+<meta name="twitter:creator" content="@alexsderkach" />
+<script type="application/ld+json">
+{"@context":"http://schema.org","@type":"BlogPosting","headline":"Kotlin Decorators","author":{"@type":"Person","name":null},"datePublished":"2017-11-24T00:00:00+00:00","dateModified":"2017-11-24T00:00:00+00:00","description":"2 years ago, I was working for a small company as Java dev. My place was situated very closely to a different team, who were doing a Python project. Every week someone from their team was screening a candidate. A question, which I would hear everytime was: “What is a decorator in Python?”","publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"http://alexsderkach.io/assets/me.png"},"name":null},"mainEntityOfPage":{"@type":"WebPage","@id":"http://alexsderkach.io/kotlin-decorators/"},"url":"http://alexsderkach.io/kotlin-decorators/"}</script>
+<!-- End Jekyll SEO tag -->
+
+    
+    <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-94002520-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+  
+
+    
+</head>
+<body>
+    <header class="padded">
+    <h3 class="title">
+        <a href="http://alexsderkach.io/" title="Home">@alexsderkach</a>
+    </h3>
+    <ul class="nav">
+        <li><a href="https://github.com/alexsderkach?tab=repositories" target="_blank">Projects</a></li>
+        <li><a href="http://alexsderkach.io/talks">Talks</a></li>
+        <li><a href="http://alexsderkach.io/me">Me</a></li>
+        <li><a href="https://twitter.com/alexsderkach" target="_blank">💬</a></li>
+    </ul>
+</header>
+    <div class="body">
+
+    <article>
+        <h1 class="padded">Kotlin Decorators</h1>
+        <span class="meta padded">
+            November 24, 2017 &middot;
+            
+
+2 mins
+ read &middot;
+            <a href="http://alexsderkach.io/kotlin-decorators/#disqus_thread" itemprop="discussionUrl">0 Comments</a>
+        </span>
+        <main><p>2 years ago, I was working for a small company as Java dev.
+My place was situated very closely to a different team, who were doing a Python project.
+Every week someone from their team was screening a candidate.
+A question, which I would hear everytime was: “What is a decorator in Python?”</p>
+
+<p>For Python, it is not exactly the same thing as <a href="https://en.wikipedia.org/wiki/Decorator_pattern">Decorator pattern</a>, but a syntactic sugar, which allows to alter functions and methods.</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><table style="border-spacing: 0"><tbody><tr><td class="gutter gl" style="text-align: right"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre></td><td class="code"><pre><span class="k">def</span> <span class="nf">p_decorate</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+   <span class="k">def</span> <span class="nf">func_wrapper</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+       <span class="k">return</span> <span class="s">"A+{0}"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">func</span><span class="p">(</span><span class="n">text</span><span class="p">))</span>
+   <span class="k">return</span> <span class="n">func_wrapper</span>
+
+<span class="nd">@p_decorate</span>
+<span class="k">def</span> <span class="nf">get_text</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+   <span class="k">return</span> <span class="s">"B+{0}"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+
+<span class="k">print</span> <span class="n">get_text</span><span class="p">(</span><span class="s">"C"</span><span class="p">)</span>
+
+<span class="c"># Outputs A+B+C</span><span class="w">
+</span></pre></td></tr></tbody></table></code></pre></figure>
+
+<p>In Java, the same is usually achieved with AOP.</p>
+
+<p>For Kotlin you could expect the same answer, but Kotlin is more expressive than Java.</p>
+
+<p>Lets say, we have the same function which returns text, as in Python example.</p>
+
+<figure class="highlight"><pre><code class="language-kotlin" data-lang="kotlin"><table style="border-spacing: 0"><tbody><tr><td class="gutter gl" style="text-align: right"><pre class="lineno">1
+2
+3
+4
+5</pre></td><td class="code"><pre><span class="k">fun</span> <span class="nf">getText</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="n">String</span><span class="p">)</span> <span class="p">=</span> <span class="s">"B+$name"</span>
+
+<span class="k">fun</span> <span class="nf">main</span><span class="p">(</span><span class="n">args</span><span class="p">:</span> <span class="n">Array</span><span class="p">&lt;</span><span class="n">String</span><span class="p">&gt;)</span> <span class="p">=</span> <span class="n">println</span><span class="p">(</span><span class="n">getText</span><span class="p">(</span><span class="s">"C"</span><span class="p">))</span>
+
+<span class="p">//</span> <span class="n">Outputs</span> <span class="n">B</span><span class="p">+</span><span class="n">C</span><span class="w">
+</span></pre></td></tr></tbody></table></code></pre></figure>
+
+<p>What we need next, is a high-order function.
+It is a function that takes functions as parameters, or returns a function.</p>
+
+<figure class="highlight"><pre><code class="language-kotlin" data-lang="kotlin"><table style="border-spacing: 0"><tbody><tr><td class="gutter gl" style="text-align: right"><pre class="lineno">1</pre></td><td class="code"><pre><span class="k">inline</span> <span class="k">fun</span> <span class="nf">prefix</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="p">()</span> <span class="p">-&gt;</span> <span class="n">String</span><span class="p">)</span> <span class="p">=</span> <span class="s">"A+${f()}"</span><span class="w">
+</span></pre></td></tr></tbody></table></code></pre></figure>
+
+<p>Additionally, in Kotlin, if a function takes another function as the last parameter, the lambda expression argument can be passed outside the parenthesized argument list.</p>
+
+<p>This means, that we could just wrap a body of a function in <strong>prefix { … }</strong>, in order to add some behavior to it.</p>
+
+<figure class="highlight"><pre><code class="language-kotlin" data-lang="kotlin"><table style="border-spacing: 0"><tbody><tr><td class="gutter gl" style="text-align: right"><pre class="lineno">1
+2
+3
+4</pre></td><td class="code"><pre><span class="k">fun</span> <span class="nf">main</span><span class="p">(</span><span class="n">args</span><span class="p">:</span> <span class="n">Array</span><span class="p">&lt;</span><span class="n">String</span><span class="p">&gt;)</span> <span class="p">=</span> <span class="n">println</span><span class="p">(</span><span class="n">getText</span><span class="p">(</span><span class="s">"C"</span><span class="p">))</span>
+
+<span class="k">inline</span> <span class="k">fun</span> <span class="nf">prefix</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="p">()</span> <span class="p">-&gt;</span> <span class="n">String</span><span class="p">)</span> <span class="p">=</span> <span class="s">"A+${f()}"</span>
+<span class="k">fun</span> <span class="nf">getText</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="n">String</span><span class="p">)</span> <span class="p">=</span> <span class="n">prefix</span> <span class="p">{</span> <span class="s">"B+$name"</span> <span class="p">}</span><span class="w">
+</span></pre></td></tr></tbody></table></code></pre></figure>
+
+<h2 id="additional-reading">Additional reading</h2>
+
+<p><a href="https://kotlinlang.org/docs/reference/lambdas.html">https://kotlinlang.org/docs/reference/lambdas.html</a></p>
+
+<p><a href="http://kotlinlang.org/docs/reference/grammar.html#callSuffix">http://kotlinlang.org/docs/reference/grammar.html#callSuffix</a></p>
+
+</main>
+        <div class="share-page padded">
+            Share this on &rarr;
+            <a href="https://twitter.com/intent/tweet?text=Kotlin Decorators&url=http://alexsderkach.io/kotlin-decorators/&via=alexsderkach&related=alexsderkach" rel="nofollow" target="_blank" title="Share on Twitter">Twitter</a>
+            <a href="https://facebook.com/sharer.php?u=http://alexsderkach.io/kotlin-decorators/" rel="nofollow" target="_blank" title="Share on Facebook">Facebook</a>
+            <a href="https://plus.google.com/share?url=http://alexsderkach.io/kotlin-decorators/" rel="nofollow" target="_blank" title="Share on Google+">Google+</a>
+        </div>
+    </article>
+
+    <div class="padded">
+        
+
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function () {
+      this.page.url = 'http://alexsderkach.io/kotlin-decorators/';
+      this.page.identifier = 'http://alexsderkach.io/kotlin-decorators/';
+    };
+
+    (function() {
+      var d = document, s = d.createElement('script');
+
+      s.src = 'https://alexsderkach.disqus.com/embed.js';
+
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+
+        <script id="dsq-count-scr" src="//alexsderkach.disqus.com/count.js" async></script>
+    </div>
+</div>
+    <footer class="padded">
+    <p>
+        This blog is built with <a href="http://jekyllrb.com/">Jekyll</a> and hosted on <a href="https://pages.github.com/">GitHub Pages</a>
+        <br>
+        <a href="https://github.com/alexsderkach" class="github"><svg height="24" class="octicon octicon-mark-github" viewBox="0 0 16 16" version="1.1" width="24" aria-hidden="true"><path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg></a>
+    </p>
+</footer>
+</body>
+</html>
